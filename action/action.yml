@@ -1,0 +1,113 @@
+# NoSelfGrade review — GitHub Action (composite)
+#
+# Runs `noselfgrade review` against a diff and uploads the SARIF certificate
+# to GitHub code scanning. The step fails when the verdict is FAIL
+# (noselfgrade exits 1), and fails with a loud error (exit 2) when reviewer
+# output is malformed, API keys are missing, or the config is invalid.
+#
+# REQUIRED SECRETS — reviewers are real LLM API calls; there is no offline
+# mode. Set at least one of these on the job (env:):
+#   ANTHROPIC_API_KEY   reviewer via Anthropic
+#   OPENAI_API_KEY      reviewer via OpenAI
+#   GEMINI_API_KEY      reviewer via Google (OpenAI-compatible endpoint)
+#   XAI_API_KEY         reviewer via xAI
+#   DEEPSEEK_API_KEY    reviewer via DeepSeek
+#   MISTRAL_API_KEY     reviewer via Mistral
+# (The exact set comes from the core REVIEW_ENV_VARS table; more keys =
+#  more disjoint reviewers available for --jury.)
+#
+# Example:
+#   jobs:
+#     review:
+#       runs-on: ubuntu-latest
+#       steps:
+#         - uses: actions/checkout@v4
+#           with:
+#             fetch-depth: 0 # needed so `git diff <base-ref>` sees history
+#         - uses: TamTunnel/noselfgrade/action@v0
+#           with:
+#             builder-model: gpt-5
+#             builder-provider: openai
+#           env:
+#             ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#             OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+name: "NoSelfGrade review"
+description: >-
+  Review a diff with LLM reviewers disjoint in family and provider from the
+  declared builder model, and upload the SARIF certificate to GitHub code
+  scanning. Requires at least one reviewer API key (e.g. ANTHROPIC_API_KEY,
+  OPENAI_API_KEY) passed via env — reviewers are real API calls.
+
+inputs:
+  builder-model:
+    description: >-
+      Declared builder model id (e.g. gpt-5). Recorded as declared, never
+      verified; unknown models fail closed unless allow-unknown-model is true.
+    required: true
+  builder-provider:
+    description: >-
+      Declared builder provider (e.g. openai). Optional; inferred from the
+      family table when the model is known.
+    required: false
+    default: ""
+  fail-on:
+    description: "Severity threshold that fails the step: critical|high|medium|low|info."
+    required: false
+    default: "high"
+  format:
+    description: "Report format for the certificate file: json|markdown|sarif|html."
+    required: false
+    default: "sarif"
+  jury:
+    description: "One reviewer per disjoint provider (up to 3). Set to 'true' to enable."
+    required: false
+    default: "false"
+  base-ref:
+    description: "Git ref to diff against (runs `git diff <base-ref>`)."
+    required: false
+    default: "HEAD~1"
+  allow-unknown-model:
+    description: "Allow builder models missing from the family table. Set to 'true' to enable."
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install noselfgrade
+      shell: bash
+      run: npm install -g @tamtunnel/noselfgrade
+
+    - name: Review diff
+      id: review
+      shell: bash
+      # Unsigned: CI has no business holding a signing key. The SARIF upload
+      # below carries the findings; sign locally with `noselfgrade keygen`
+      # when you need a certified artifact.
+      run: |
+        set -euo pipefail
+        ARGS=(review --base "${{ inputs.base-ref }}" --builder-model "${{ inputs.builder-model }}" --fail-on "${{ inputs.fail-on }}" --format "${{ inputs.format }}" --no-sign -o "noselfgrade.${{ inputs.format }}" --timeout 300)
+        if [ -n "${{ inputs.builder-provider }}" ]; then
+          ARGS+=(--builder-provider "${{ inputs.builder-provider }}")
+        fi
+        if [ "${{ inputs.jury }}" = "true" ]; then
+          ARGS+=(--jury)
+        fi
+        if [ "${{ inputs.allow-unknown-model }}" = "true" ]; then
+          ARGS+=(--allow-unknown-model)
+        fi
+        noselfgrade "${ARGS[@]}"
+
+    - name: Upload SARIF to code scanning
+      # Only meaningful when format == 'sarif' (the default); other formats
+      # still fail/pass the step via noselfgrade's exit code above.
+      if: always() && inputs.format == 'sarif'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: noselfgrade.sarif

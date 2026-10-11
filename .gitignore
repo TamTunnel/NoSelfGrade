@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Signing keys live in ~/.noselfgrade (mode 600), not in the repo.
+# Never commit private key material.
+
+# Local config
+.noselfgrade.json
+
+# Logs and editor state
+*.log
+.DS_Store

@@ -1,0 +1,1 @@
+{"compilerOptions":{"outDir":"./dist","rootDir":"./src"},"extends":"../core/tsconfig.json","include":["src"],"references":[{"path":"../core"}]}
