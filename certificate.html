@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoSelfGrade Review Report — FAIL</title>
+<style>
+:root { color-scheme: light dark; }
+body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 2rem; max-width: 72rem; margin-inline: auto; line-height: 1.5; color: #1a1a1a; background: #ffffff; }
+.banner { border-radius: 0.5rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 700; }
+.banner.pass { background: #e6f4ea; color: #137333; border: 1px solid #a8dab5; }
+.banner.fail { background: #fce8e6; color: #a50e0e; border: 1px solid #f5a5a1; }
+section { margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
+.meta { color: #555; }
+.finding { border: 1px solid #ccc; border-radius: 0.5rem; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.finding h3 { margin-top: 0; font-size: 1.05rem; }
+.badge { display: inline-block; border-radius: 0.25rem; padding: 0.1rem 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+.badge.critical { background: #fce8e6; color: #a50e0e; }
+.badge.high { background: #fef7e0; color: #b06000; }
+.badge.medium { background: #fef7e0; color: #7a5c00; }
+.badge.low { background: #e8f0fe; color: #1a56db; }
+.badge.info { background: #f1f3f4; color: #5f6368; }
+.badge.category { background: #e8f0fe; color: #174ea6; }
+pre { background: #f6f8fa; border: 1px solid #ddd; border-radius: 0.375rem; padding: 0.75rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+.disjoint { color: #137333; }
+.unsigned { background: #fef7e0; border: 2px solid #f9ab00; border-radius: 0.375rem; padding: 0.75rem 1rem; margin: 1rem 0; font-weight: 500; }
+.limitation { font-style: italic; color: #555; border-left: 3px solid #ccc; padding-left: 1rem; }
+table.summary { border-collapse: collapse; }
+table.summary td, table.summary th { border: 1px solid #ccc; padding: 0.4rem 0.9rem; text-align: left; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e8eaed; background: #121212; }
+  .banner.pass { background: #1e3a2a; color: #81c995; border-color: #2d5a3f; }
+  .banner.fail { background: #3a1e1e; color: #f28b82; border-color: #5a2d2d; }
+  h2 { border-bottom-color: #444; }
+  .finding { border-color: #444; }
+  .meta, .limitation { color: #9aa0a6; }
+  pre { background: #1e1e1e; border-color: #444; }
+  .badge.critical { background: #3a1e1e; color: #f28b82; }
+  .badge.high, .badge.medium { background: #3a2f1e; color: #fdd663; }
+  .badge.low, .badge.category { background: #1e2a3a; color: #8ab4f8; }
+  .badge.info { background: #2a2a2a; color: #9aa0a6; }
+  .disjoint { color: #81c995; }
+  table.summary td, table.summary th { border-color: #444; }
+}
+</style>
+</head>
+<body>
+<div class="banner fail">NoSelfGrade — ❌ FAIL</div>
+
+<section>
+<h2>Report metadata</h2>
+<p class="meta">Reviewed at 2026-10-11T17:01:13.821Z · Diff hash (sha256) <code>9af6312bb02788b8d98ca2a32ef9d760ec0b93979d1a4faa7a36fb016a7f1a9d</code> · Signature key id <code>keyid:322d183eed8282b7</code></p>
+</section>
+
+<section>
+<h2>Independence statement</h2>
+<ul>
+<li><strong>Builder:</strong> model <code>gpt-5</code>, provider <code>openai</code>, family <code>gpt</code> — <em>declared, not verified</em>.</li>
+<li><strong>Reviewer:</strong> provider <code>anthropic</code>, model <code>claude-sonnet-4-5</code>, API-key fingerprint <code>sample:abcd1234</code>.
+<br><span class="disjoint">Disjointness: reviewer provider anthropic ≠ builder provider openai, family ≠ gpt — disjoint ✓</span></li>
+</ul>
+<p class="limitation">Builder identity is declared, not verified. The signature proves this review ran with these reviewers on this diff — nothing more.</p>
+</section>
+
+<section>
+<h2>Findings</h2>
+<h3>high (1)</h3>
+<article class="finding">
+<h3><span class="badge high">high</span>
+<span class="badge category">security</span>
+auth.js:4</h3>
+<p class="meta">Confidence: 92% · Reviewer: claude-sonnet-4-5</p>
+<pre>SQL injection: user input concatenated into query string</pre>
+<h4>Remediation</h4>
+<pre>Use parameterized queries.</pre>
+</article><h3>medium (1)</h3>
+<article class="finding">
+<h3><span class="badge medium">medium</span>
+<span class="badge category">correctness</span>
+auth.js:6</h3>
+<p class="meta">Confidence: 65% · Reviewer: claude-sonnet-4-5</p>
+<pre>Consider rate limiting on the login endpoint</pre>
+<h4>Remediation</h4>
+<pre>Add rate limiting.</pre>
+</article>
+</section>
+
+<section>
+<h2>Summary</h2>
+<table class="summary">
+<tr><th>Severity</th><th>Count</th></tr>
+<tr><td>critical</td><td>0</td></tr>
+<tr><td>high</td><td>1</td></tr>
+<tr><td>medium</td><td>1</td></tr>
+<tr><td>low</td><td>0</td></tr>
+<tr><td>info</td><td>0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>2</strong></td></tr>
+</table>
+</section>
+</body>
+</html>
